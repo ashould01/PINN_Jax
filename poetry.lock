@@ -1,0 +1,388 @@
+[[package]]
+name = "absl-py"
+version = "2.1.0"
+description = "Abseil Python Common Libraries, see https://github.com/abseil/abseil-py."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
+name = "chex"
+version = "0.1.88"
+description = "Chex: Testing made fun, in JAX!"
+category = "main"
+optional = false
+python-versions = ">=3.9"
+
+[package.dependencies]
+absl-py = ">=0.9.0"
+jax = ">=0.4.27"
+jaxlib = ">=0.4.27"
+numpy = ">=1.24.1"
+toolz = ">=0.9.0"
+typing_extensions = ">=4.2.0"
+
+[[package]]
+name = "colorama"
+version = "0.4.6"
+description = "Cross-platform colored terminal text."
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
+
+[[package]]
+name = "contourpy"
+version = "1.3.1"
+description = "Python library for calculating contours of 2D quadrilateral grids"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.dependencies]
+numpy = ">=1.23"
+
+[package.extras]
+docs = ["furo", "sphinx (>=7.2)", "sphinx-copybutton"]
+bokeh = ["bokeh", "selenium"]
+mypy = ["contourpy", "docutils-stubs", "mypy (==1.11.1)", "types-pillow"]
+test = ["contourpy", "matplotlib", "pillow"]
+test-no-images = ["pytest", "pytest-cov", "pytest-rerunfailures", "pytest-xdist", "wurlitzer"]
+
+[[package]]
+name = "cycler"
+version = "0.12.1"
+description = "Composable style cycles"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.extras]
+docs = ["ipython", "matplotlib", "numpydoc", "sphinx"]
+tests = ["pytest", "pytest-cov", "pytest-xdist"]
+
+[[package]]
+name = "etils"
+version = "1.12.0"
+description = "Collection of common python utils"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.dependencies]
+typing_extensions = {version = "*", optional = true, markers = "extra == \"epy\""}
+
+[package.extras]
+all = ["etils", "etils", "etils", "etils", "etils", "etils", "etils", "etils", "etils", "etils", "etils", "etils", "etils", "etils"]
+array-types = ["etils"]
+dev = ["pytest", "pytest-subtests", "pytest-xdist", "pyink", "pylint (>=2.6.0)", "chex", "fiddle", "torch", "optree", "tensorflow-datasets", "pydantic"]
+docs = ["sphinx-apitree", "etils"]
+eapp = ["absl-py", "simple-parsing", "etils"]
+ecolab = ["jupyter", "numpy", "mediapy", "packaging", "protobuf", "etils", "etils", "etils"]
+edc = ["etils"]
+enp = ["numpy", "etils"]
+epath = ["fsspec", "importlib-resources", "typing-extensions", "zipp", "etils"]
+epath-gcs = ["gcsfs", "etils"]
+epath-s3 = ["s3fs", "etils"]
+epy = ["typing-extensions"]
+etqdm = ["absl-py", "tqdm", "etils"]
+etree = ["etils", "etils", "etils", "etils"]
+etree-dm = ["dm-tree", "etils"]
+etree-jax = ["jax", "etils"]
+etree-tf = ["tensorflow", "etils"]
+lazy-imports = ["etils"]
+
+[[package]]
+name = "fonttools"
+version = "4.56.0"
+description = "Tools to manipulate font files"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.extras]
+ufo = ["fs (>=2.2.0,<3)"]
+lxml = ["lxml (>=4.0)"]
+woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
+unicode = ["unicodedata2 (>=15.1.0)"]
+graphite = ["lz4 (>=1.7.4.2)"]
+interpolatable = ["scipy", "munkres", "pycairo"]
+plot = ["matplotlib"]
+symfont = ["sympy"]
+type1 = ["xattr"]
+pathops = ["skia-pathops (>=0.5.0)"]
+repacker = ["uharfbuzz (>=0.23.0)"]
+all = ["fs (>=2.2.0,<3)", "lxml (>=4.0)", "brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)", "unicodedata2 (>=15.1.0)", "lz4 (>=1.7.4.2)", "scipy", "munkres", "pycairo", "matplotlib", "sympy", "xattr", "skia-pathops (>=0.5.0)", "uharfbuzz (>=0.23.0)"]
+
+[[package]]
+name = "jax"
+version = "0.5.0"
+description = "Differentiate, compile, and transform Numpy code."
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.dependencies]
+jaxlib = "0.5.0"
+ml_dtypes = ">=0.4.0"
+numpy = [
+    {version = ">=1.25", markers = "python_version < \"3.12\""},
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+]
+opt_einsum = "*"
+scipy = ">=1.11.1"
+
+[package.extras]
+minimum-jaxlib = ["jaxlib (==0.5.0)"]
+ci = ["jaxlib (==0.4.38)"]
+tpu = ["jaxlib (==0.5.0)", "libtpu-nightly (==0.1.dev20241010+nightly.cleanup)", "libtpu (==0.0.8)", "requests"]
+cuda = ["jaxlib (==0.5.0)", "jax-cuda12-plugin[with_cuda] (==0.5.0)"]
+cuda12 = ["jaxlib (==0.5.0)", "jax-cuda12-plugin[with_cuda] (==0.5.0)"]
+cuda12-pip = ["jaxlib (==0.5.0)", "jax-cuda12-plugin[with_cuda] (==0.5.0)"]
+cuda12-local = ["jaxlib (==0.5.0)", "jax-cuda12-plugin (==0.5.0)"]
+rocm = ["jaxlib (==0.5.0)", "jax-rocm60-plugin (==0.5.0)"]
+k8s = ["kubernetes"]
+
+[[package]]
+name = "jaxlib"
+version = "0.5.0"
+description = "XLA library for JAX"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.dependencies]
+ml-dtypes = ">=0.2.0"
+numpy = ">=1.25"
+scipy = ">=1.11.1"
+
+[[package]]
+name = "kiwisolver"
+version = "1.4.8"
+description = "A fast implementation of the Cassowary constraint solver"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[[package]]
+name = "matplotlib"
+version = "3.10.0"
+description = "Python plotting package"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.dependencies]
+contourpy = ">=1.0.1"
+cycler = ">=0.10"
+fonttools = ">=4.22.0"
+kiwisolver = ">=1.3.1"
+numpy = ">=1.23"
+packaging = ">=20.0"
+pillow = ">=8"
+pyparsing = ">=2.3.1"
+python-dateutil = ">=2.7"
+
+[package.extras]
+dev = ["meson-python (>=0.13.1,<0.17.0)", "pybind11 (>=2.13.2,!=2.13.3)", "setuptools_scm (>=7)", "setuptools (>=64)"]
+
+[[package]]
+name = "ml-dtypes"
+version = "0.5.1"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.9"
+
+[package.dependencies]
+numpy = [
+    {version = ">=1.21", markers = "python_version < \"3.10\""},
+    {version = ">=1.21.2", markers = "python_version >= \"3.10\""},
+    {version = ">=1.23.3", markers = "python_version >= \"3.11\""},
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=2.1.0", markers = "python_version >= \"3.13\""},
+]
+
+[package.extras]
+dev = ["absl-py", "pytest", "pytest-xdist", "pylint (>=2.6.0)", "pyink"]
+
+[[package]]
+name = "numpy"
+version = "2.2.3"
+description = "Fundamental package for array computing in Python"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[[package]]
+name = "opt-einsum"
+version = "3.4.0"
+description = "Path optimization of einsum functions."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "optax"
+version = "0.2.4"
+description = "A gradient processing and optimization library in JAX."
+category = "main"
+optional = false
+python-versions = ">=3.9"
+
+[package.dependencies]
+absl-py = ">=0.7.1"
+chex = ">=0.1.87"
+etils = {version = "*", extras = ["epy"]}
+jax = ">=0.4.27"
+jaxlib = ">=0.4.27"
+numpy = ">=1.18.0"
+
+[package.extras]
+docs = ["sphinx (>=6.0.0)", "sphinx-book-theme (>=1.0.1)", "sphinxcontrib-katex", "sphinx-autodoc-typehints", "ipython (>=8.8.0)", "myst-nb (>=1.0.0)", "matplotlib (>=3.5.0)", "sphinx-gallery (>=0.14.0)", "sphinx-collections (>=0.0.1)", "tensorflow (>=2.4.0)", "tensorflow-datasets (>=4.2.0)", "flax", "sphinx-contributors"]
+dp-accounting = ["absl-py (>=1.0.0)", "attrs (>=21.4.0)", "mpmath (>=1.2.1)", "numpy (>=1.21.4)", "scipy (>=1.7.1)"]
+examples = ["tensorflow-datasets (>=4.2.0)", "tensorflow (>=2.4.0)", "dp_accounting (>=0.4)", "ipywidgets", "flax"]
+test = ["dm-tree (>=0.1.7)", "flax (>=0.5.3)", "scipy (>=1.7.1)", "scikit-learn"]
+
+[[package]]
+name = "packaging"
+version = "24.2"
+description = "Core utilities for Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "pillow"
+version = "11.1.0"
+description = "Python Imaging Library (Fork)"
+category = "main"
+optional = false
+python-versions = ">=3.9"
+
+[package.extras]
+docs = ["furo", "olefile", "sphinx (>=8.1)", "sphinx-copybutton", "sphinx-inline-tabs", "sphinxext-opengraph"]
+fpx = ["olefile"]
+mic = ["olefile"]
+tests = ["check-manifest", "coverage (>=7.4.2)", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout", "trove-classifiers (>=2024.10.12)"]
+typing = ["typing-extensions"]
+xmp = ["defusedxml"]
+
+[[package]]
+name = "pyparsing"
+version = "3.2.1"
+description = "pyparsing module - Classes and methods to define and execute parsing grammars"
+category = "main"
+optional = false
+python-versions = ">=3.9"
+
+[package.extras]
+diagrams = ["railroad-diagrams", "jinja2"]
+
+[[package]]
+name = "python-dateutil"
+version = "2.9.0.post0"
+description = "Extensions to the standard Python datetime module"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
+name = "pyyaml"
+version = "6.0.2"
+description = "YAML parser and emitter for Python"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "scipy"
+version = "1.15.1"
+description = "Fundamental algorithms for scientific computing in Python"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.dependencies]
+numpy = ">=1.23.5,<2.5"
+
+[package.extras]
+test = ["pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "asv", "mpmath", "gmpy2", "threadpoolctl", "scikit-umfpack", "pooch", "hypothesis (>=6.30)", "array-api-strict (>=2.0,<2.1.1)", "cython", "meson", "ninja"]
+doc = ["sphinx (>=5.0.0,<8.0.0)", "intersphinx-registry", "pydata-sphinx-theme (>=0.15.2)", "sphinx-copybutton", "sphinx-design (>=0.4.0)", "matplotlib (>=3.5)", "numpydoc", "jupytext", "myst-nb", "pooch", "jupyterlite-sphinx (>=0.16.5)", "jupyterlite-pyodide-kernel"]
+dev = ["mypy (==1.10.0)", "typing-extensions", "types-psutil", "pycodestyle", "ruff (>=0.0.292)", "cython-lint (>=0.12.2)", "rich-click", "doit (>=0.36.0)", "pydevtool"]
+
+[[package]]
+name = "six"
+version = "1.17.0"
+description = "Python 2 and 3 compatibility utilities"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+
+[[package]]
+name = "toolz"
+version = "1.0.0"
+description = "List processing tools and functional utilities"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "tqdm"
+version = "4.67.1"
+description = "Fast, Extensible Progress Meter"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-asyncio (>=0.24)", "nbval"]
+discord = ["requests"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+notebook = ["ipywidgets (>=6)"]
+
+[[package]]
+name = "typing-extensions"
+version = "4.12.2"
+description = "Backported and Experimental Type Hints for Python 3.8+"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.10"
+content-hash = "6556e7fc1b55c947a95eb83d76f4235339a44c12141c024adbeda8657d364d8f"
+
+[metadata.files]
+absl-py = []
+chex = []
+colorama = []
+contourpy = []
+cycler = []
+etils = []
+fonttools = []
+jax = []
+jaxlib = []
+kiwisolver = []
+matplotlib = []
+ml-dtypes = []
+numpy = []
+opt-einsum = []
+optax = []
+packaging = []
+pillow = []
+pyparsing = []
+python-dateutil = []
+pyyaml = []
+scipy = []
+six = []
+toolz = []
+tqdm = []
+typing-extensions = []

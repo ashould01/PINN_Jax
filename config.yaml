@@ -1,0 +1,12 @@
+data:
+  equation: 'laplace'
+  pointnbrs: [250, 10_000]
+  domaintype: 'rectangle'
+  geometry: [[-1, -1], [1, 1]]
+
+model:
+  layers: [2, 32, 32, 32, 1]
+  lrtype: 'constant'
+  lr: 1e-2
+  optimizer: 'adam'
+  epoch: 10_000
