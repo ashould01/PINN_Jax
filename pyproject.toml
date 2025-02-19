@@ -7,10 +7,12 @@ authors = ["ashould01"]
 [tool.poetry.dependencies]
 python = "^3.10"
 matplotlib = "^3.10.0"
-jax = {extras = ["cuda11"], version = "^0.5.0"}
+
 optax = "^0.2.4"
 tqdm = "^4.67.1"
 PyYAML = "^6.0.2"
+jax = "^0.5.0"
+jaxlib = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
 

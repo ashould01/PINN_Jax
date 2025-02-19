@@ -15,8 +15,8 @@ def init_params(layers):
     params = list()
     initializer = jax.nn.initializers.glorot_normal()
     for key, n_in, n_out in zip(keys, layers[:-1], layers[1:]):
-        W = initializer(keys, (n_in, n_out), jnp.float32)
-        B = jax.random.uniform(key, shape=(n_out,), type = jnp.float32)
+        W = initializer(key, (n_in, n_out), jnp.float32)
+        B = jax.random.uniform(key, shape=(n_out,), dtype = jnp.float32)
         params.append({'W' : W,'B' : B})
     return params
 
