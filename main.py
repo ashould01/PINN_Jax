@@ -8,7 +8,7 @@ import yaml
 import os
 import matplotlib.pyplot as plt
 
-from equation import *
+from equationcondition import *
 from model import *
 from utils import MSEmeanloss, TqdmLoggingHandler, pointgenerate, computeloss
 
@@ -80,12 +80,16 @@ def main():
     losses = []
     for epo in tqbar:
         opt_state, params = update(opt_state, params, bdpts, repts)
-        if epo % 1000 == 0:
+        
+        if epo % configure['compile_period'] == 0:
             losss = loss(params, bdpts, repts)
-            log.info(f"loss : {losss}")
             np.save(f"{save_path}/parameters.npy", jax.device_get(params))
             losses.append(losss)
-    
-    plt.plot(configure['model']['epoch'], losses)
+        tqbar.set_postfix({'loss' : losss})
+    np.save(f"{save_path}/loss.npy", losses)
+
+    plt.figure(figsize=(15, 15))
+    plt.plot(np.arange(configure['model']['epoch'] / configure['compile_period']), losses)
+    plt.show()
 
 main()
