@@ -2,11 +2,21 @@ data:
   equation: 'laplace'
   pointnbrs: [250, 10_000]
   domaintype: 'rectangular'
-  geometry: [[-1, -1], [1, 1]]
+  geometry: [[0, 0], [2, 1]]
 
 model:
   layers: [2, 32, 32, 32, 1]
   lrtype: 'constant'
-  lr: 1e-2
+  init_lr: 1e-2
+  decay_steps:
+    30000: 5e-3
+    # 35000: 1e-3
+    # 45000: 5e-4
+    # 47500: 1e-4
   optimizer: 'adam'
-  epoch: 10_000
+  epoch: 50_000
+
+coeff:
+  residual: 1
+  boundary: 10
+  regularizer: 0.1

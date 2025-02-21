@@ -1,7 +1,9 @@
 import jax
+import logging
 import jax.numpy as jnp
 from time import time
 from tqdm import tqdm
+
 
 class pointgenerate:
     
@@ -84,13 +86,15 @@ class pointgenerate:
         else:
             return NotImplementedError
 
-@jax.jit
-def MSEloss(true, target, mode = 'mean'):
-    if mode == 'mean':
-        return jnp.mean(jnp.square(true - target))
-    elif mode == 'sum':
-        return jnp.sum(jnp.square(true - target))
 
+@jax.jit
+def MSEmeanloss(true, target):
+    return jnp.mean(jnp.square(true - target))
+
+@jax.jit
+def MSEsumloss(true, target):
+    return jnp.sum(jnp.square(true - target))
+        
 class computeloss:
 
     def __init__(self, domaintype, equation):
@@ -106,13 +110,14 @@ class computeloss:
             raise NotImplementedError
     
     def laplace(self, pointx, pointy, u):
-        u_x = jax.grad(lambda x, y: jnp.sum(u(x, y)), 0)
-        u_xx = jax.grad(lambda x, y: jnp.sum(u_x(x, y)), 0)
-        u_y = jax.grad(lambda x, y: jnp.sum(u(x, y)), 1)
-        u_yy = jax.grad(lambda x, y: jnp.sum(u_y(x, y)), 1)
+        u_x = lambda x, y: jax.grad(lambda x, y: jnp.sum(u(x, y)), 0)(x, y)
+        u_xx = lambda x, y: jax.grad(lambda x, y: jnp.sum(u_x(x, y)), 0)(x, y)
+        u_y = lambda x, y: jax.grad(lambda x, y: jnp.sum(u(x, y)), 1)(x, y)
+        u_yy = lambda x, y: jax.grad(lambda x, y: jnp.sum(u_y(x, y)), 1)(x, y)
         
         return u_xx(pointx, pointy) + u_yy(pointx, pointy)
     
+
     def __call__(self, params, point, model, lossfunction):
         
         if self.equation == 'laplace':
@@ -159,18 +164,13 @@ def logging_time(func):
         return result
     return wrapper_func
 
-# class TqdmLoggingHandler(logging.StreamHandler):
-#     """Avoid tqdm progress bar interruption by logger's output to console"""
-#     # see logging.StreamHandler.eval method:
-#     # https://github.com/python/cpython/blob/d2e2534751fd675c4d5d3adc208bf4fc984da7bf/Lib/logging/__init__.py#L1082-L1091
-#     # and tqdm.write method:
-#     # https://github.com/tqdm/tqdm/blob/f86104a1f30c38e6f80bfd8fb16d5fcde1e7749f/tqdm/std.py#L614-L620
+class TqdmLoggingHandler(logging.StreamHandler):
 
-#     def emit(self, record):
-#         try:
-#             msg = self.format(record)
-#             tqdm.write(msg, end=self.terminator)
-#         except RecursionError:
-#             raise
-#         except Exception:
-#             self.handleError(record)
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            tqdm.write(msg, end=self.terminator)
+        except RecursionError:
+            raise
+        except Exception:
+            self.handleError(record)
