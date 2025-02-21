@@ -1,8 +1,5 @@
 import jax
 import jax.numpy as jnp
-import numpy as np
-import matplotlib.pyplot as plt
-
 
 def init_params(layers):
     
@@ -20,14 +17,13 @@ def init_params(layers):
         params.append({'W' : W,'B' : B})
     return params
 
-def forward(params, X):
+def forward(params, x, y):
     
     '''
         input = parameters, residual points
         output = model output
     '''
-    
-
+    X = jnp.concatenate([x, y], axis = 1)
     *hidden, last = params
     for layer in hidden :
         X = jax.nn.tanh(X @ layer['W']+layer['B'])

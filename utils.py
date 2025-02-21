@@ -1,5 +1,7 @@
 import jax
 import jax.numpy as jnp
+from time import time
+from tqdm import tqdm
 
 class pointgenerate:
     
@@ -20,7 +22,7 @@ class pointgenerate:
             input : boundaryfunction
             output : [boundarypoints, boundaryfunctionvalue] -> shape (4 (edges), N_b, 3)
         '''
-        
+
         # (xmin, y)
         y_b1 = jax.random.uniform(self.boundary_key1, minval = self.ymin, maxval = self.ymax, shape=(self.N_b, 1))
         x_b1 = jnp.ones_like(y_b1) * self.xmin
@@ -49,7 +51,7 @@ class pointgenerate:
         bc_4 = boundaryfunction[3](boundary4)
         boundaryup = jnp.concatenate([boundary4, bc_4], axis=1)
 
-        return jnp.concatenate([boundaryleft, boundaryright, boundarydown, boundaryup], axis = 1)
+        return jnp.concatenate([boundaryleft[None, :, :], boundaryright[None, :, :], boundarydown[None, :, :], boundaryup[None, :, :]], axis = 0)
         
     def residualpoints(self, residualfunction):
         
@@ -58,15 +60,15 @@ class pointgenerate:
             output : [boundarypoints, boundaryfunctionvalue] -> shape (N_b, 3)
         '''
         
-        x_c = jax.random.uniform(self.residual_key1, minval = self.xmin, maxval = self.xmax)
-        y_c = jax.random.uniform(self.residual_key2, minval = self.ymin, maxval = self.ymax)
+        x_c = jax.random.uniform(self.residual_key1, minval = self.xmin, maxval = self.xmax).reshape(-1, 1)
+        y_c = jax.random.uniform(self.residual_key2, minval = self.ymin, maxval = self.ymax).reshape(-1, 1)
         residual = jnp.concatenate([x_c, y_c], axis = 1)
         r_c = residualfunction(residual)
         
         return jnp.concatenate([x_c, y_c, r_c], axis = 1)
         
         
-    def __main__(self, domaintype, geometry, boundaryfunction, residualfunction):
+    def __call__(self, domaintype, geometry, boundaryfunction, residualfunction):
         
         if domaintype == 'rectangular':
             self.boundary_key1, self.boundary_key2, self.boundary_key3, self.boundary_key4 = jax.random.split(jax.random.PRNGKey(0), 4)
@@ -80,8 +82,15 @@ class pointgenerate:
             
             return point
         else:
-            raise NotImplementedError
-        
+            return NotImplementedError
+
+@jax.jit
+def MSEloss(true, target, mode = 'mean'):
+    if mode == 'mean':
+        return jnp.mean(jnp.square(true - target))
+    elif mode == 'sum':
+        return jnp.sum(jnp.square(true - target))
+
 class computeloss:
 
     def __init__(self, domaintype, equation):
@@ -95,23 +104,16 @@ class computeloss:
         
         else:
             raise NotImplementedError
-        
-    def MSEloss(self, true, target, mode = 'mean'):
-        if mode == 'mean':
-            return jnp.mean(jnp.square(true - target))
-        elif mode == 'sum':
-            return jnp.sum(jnp.square(true - target))
-        
     
-    def laplace(self, params, point, u):
-        u_x = jax.grad(u(params, point), 1)
-        u_xx = jax.grad(u_x(params, point), 1)
-        u_y = jax.grad(u(params, point), 2)
-        u_yy = jax.grad(u_y(params, point), 2)
+    def laplace(self, pointx, pointy, u):
+        u_x = jax.grad(lambda x, y: jnp.sum(u(x, y)), 0)
+        u_xx = jax.grad(lambda x, y: jnp.sum(u_x(x, y)), 0)
+        u_y = jax.grad(lambda x, y: jnp.sum(u(x, y)), 1)
+        u_yy = jax.grad(lambda x, y: jnp.sum(u_y(x, y)), 1)
         
-        return (u_xx + u_yy).reshape(-1, 1)
+        return u_xx(pointx, pointy) + u_yy(pointx, pointy)
     
-    def __call__(self, point, params, model, lossfunction):
+    def __call__(self, params, point, model, lossfunction):
         
         if self.equation == 'laplace':
             equationfunction = self.laplace
@@ -135,17 +137,40 @@ class computeloss:
         if self.domaintype == 'rectangular':
             boundaryloss = 0
             for j in range(point['boundary'].shape[0]):
-                boundarymodelpoint = point['boundary'][j, :, 0:2]
+                boundarymodelpointx, boundarymodelpointy = point['boundary'][j, :, 0:1], point['boundary'][j, :, 1:2]  
                 boundarytargetpoint = point['boundary'][j, :, 2:3]
-                boundaryloss += boundarylossftn(model(params, boundarymodelpoint), boundarytargetpoint)
+                boundaryloss += boundarylossftn(model(params)(boundarymodelpointx, boundarymodelpointy), boundarytargetpoint)
 
-            residualmodelpoint = point['residual'][:, 0:2]
+            residualmodelpointx, residualmodelpointy = point['residual'][:, 0:1], point['residual'][:, 1:2]
             residualtargetpoint = point['residual'][:, 2:3]
-            residualloss = residuallossftn(equationfunction(params, boundarytargetpoint, model(params, residualmodelpoint)), residualmodelpoint)
+            residualloss = residuallossftn(equationfunction(residualmodelpointx, residualmodelpointy, model(params)), residualtargetpoint)
 
-            return [boundaryloss, residualloss]
+            return jnp.array([boundaryloss, residualloss])
         
         else:
             raise NotImplementedError
-            
         
+def logging_time(func):
+    def wrapper_func(*args, **kwargs):
+        start = time()
+        result = func(*args, **kwargs)
+        end = time()
+        print(f'Elapsed time for {func.__name__} : {end - start:.3f}')
+        return result
+    return wrapper_func
+
+# class TqdmLoggingHandler(logging.StreamHandler):
+#     """Avoid tqdm progress bar interruption by logger's output to console"""
+#     # see logging.StreamHandler.eval method:
+#     # https://github.com/python/cpython/blob/d2e2534751fd675c4d5d3adc208bf4fc984da7bf/Lib/logging/__init__.py#L1082-L1091
+#     # and tqdm.write method:
+#     # https://github.com/tqdm/tqdm/blob/f86104a1f30c38e6f80bfd8fb16d5fcde1e7749f/tqdm/std.py#L614-L620
+
+#     def emit(self, record):
+#         try:
+#             msg = self.format(record)
+#             tqdm.write(msg, end=self.terminator)
+#         except RecursionError:
+#             raise
+#         except Exception:
+#             self.handleError(record)

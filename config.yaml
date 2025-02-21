@@ -1,7 +1,7 @@
 data:
   equation: 'laplace'
   pointnbrs: [250, 10_000]
-  domaintype: 'rectangle'
+  domaintype: 'rectangular'
   geometry: [[-1, -1], [1, 1]]
 
 model:
