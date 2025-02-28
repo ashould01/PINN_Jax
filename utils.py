@@ -3,88 +3,8 @@ import logging
 import jax.numpy as jnp
 from time import time
 from tqdm import tqdm
-
-
-class pointgenerate:
-    
-    def __init__(self, pointnbrs):
-        
-        '''
-        boundary conditions
-        pointnbrs = [N_i, N_b, N_r]
-        geometry = {rectangle : [[xmin, ymin], [xmax, ymax]]}
-        '''
-        self.N_b, self.N_r = pointnbrs
-        # self.N_i, self.N_b, self.N_r= pointnbrs
-
-
-    def rectboundarypoints(self, boundaryfunction):
-        
-        '''
-            input : boundaryfunction
-            output : [boundarypoints, boundaryfunctionvalue] -> shape (4 (edges), N_b, 3)
-        '''
-
-        # (xmin, y)
-        y_b1 = jax.random.uniform(self.boundary_key1, minval = self.ymin, maxval = self.ymax, shape=(self.N_b, 1))
-        x_b1 = jnp.ones_like(y_b1) * self.xmin
-        boundary1 = jnp.concatenate([x_b1, y_b1], axis = 1)
-        bc_1 = boundaryfunction[0](boundary1)
-        boundaryleft = jnp.concatenate([boundary1, bc_1], axis = 1)
-
-        # (xmax, y)
-        y_b2 = jax.random.uniform(self.boundary_key2, minval = self.ymin, maxval = self.ymax, shape=(self.N_b, 1))
-        x_b2 = jnp.ones_like(y_b2) * self.xmax
-        boundary2 = jnp.concatenate([x_b2, y_b2], axis = 1)
-        bc_2 = boundaryfunction[1](boundary2)
-        boundaryright = jnp.concatenate([boundary2, bc_2], axis=1)
-
-        # (x, ymin)
-        x_b3 = jax.random.uniform(self.boundary_key3, minval = self.xmin, maxval = self.xmax, shape=(self.N_b, 1))
-        y_b3 = jnp.ones_like(x_b3) * self.ymin
-        boundary3 = jnp.concatenate([x_b3, y_b3], axis = 1)
-        bc_3 = boundaryfunction[2](boundary3)
-        boundarydown = jnp.concatenate([boundary3, bc_3], axis=1)
-
-        # (x, ymax)
-        x_b4 = jax.random.uniform(self.boundary_key4, minval = self.xmin, maxval = self.xmax, shape=(self.N_b, 1))
-        y_b4 = jnp.ones_like(x_b4) * self.ymax
-        boundary4 = jnp.concatenate([x_b4, y_b4], axis = 1)
-        bc_4 = boundaryfunction[3](boundary4)
-        boundaryup = jnp.concatenate([boundary4, bc_4], axis=1)
-
-        return jnp.concatenate([boundaryleft[None, :, :], boundaryright[None, :, :], boundarydown[None, :, :], boundaryup[None, :, :]], axis = 0)
-        
-    def residualpoints(self, residualfunction):
-        
-        '''
-            input : boundaryfunction
-            output : [boundarypoints, boundaryfunctionvalue] -> shape (N_b, 3)
-        '''
-        
-        x_c = jax.random.uniform(self.residual_key1, minval = self.xmin, maxval = self.xmax).reshape(-1, 1)
-        y_c = jax.random.uniform(self.residual_key2, minval = self.ymin, maxval = self.ymax).reshape(-1, 1)
-        residual = jnp.concatenate([x_c, y_c], axis = 1)
-        r_c = residualfunction(residual)
-        
-        return jnp.concatenate([x_c, y_c, r_c], axis = 1)
-        
-        
-    def __call__(self, domaintype, geometry, boundaryfunction, residualfunction):
-        
-        if domaintype == 'rectangular':
-            self.boundary_key1, self.boundary_key2, self.boundary_key3, self.boundary_key4 = jax.random.split(jax.random.PRNGKey(0), 4)
-            self.residual_key1, self.residual_key2 = jax.random.split(jax.random.PRNGKey(0), 2)
-            self.xmin, self.ymin = geometry[0]
-            self.xmax, self.ymax = geometry[1]
-            # initial = self.initialpoints()
-            boundary = self.rectboundarypoints(boundaryfunction)
-            residual = self.residualpoints(residualfunction)
-            point = {'boundary' : boundary, 'residual' : residual}
-            
-            return point
-        else:
-            return NotImplementedError
+import sympy as sp
+import numpy as np
 
 
 @jax.jit
@@ -94,66 +14,6 @@ def MSEmeanloss(true, target):
 @jax.jit
 def MSEsumloss(true, target):
     return jnp.sum(jnp.square(true - target))
-        
-class computeloss:
-
-    def __init__(self, domaintype, equation):
-        self.domaintype = domaintype
-        self.equation = equation
-        if equation in ['burgers']:
-            self.timemode = True
-        
-        elif equation in ['laplace']:
-            self.timemode = False
-        
-        else:
-            raise NotImplementedError
-    
-    def laplace(self, pointx, pointy, u):
-        u_x = lambda x, y: jax.grad(lambda x, y: jnp.sum(u(x, y)), 0)(x, y)
-        u_xx = lambda x, y: jax.grad(lambda x, y: jnp.sum(u_x(x, y)), 0)(x, y)
-        u_y = lambda x, y: jax.grad(lambda x, y: jnp.sum(u(x, y)), 1)(x, y)
-        u_yy = lambda x, y: jax.grad(lambda x, y: jnp.sum(u_y(x, y)), 1)(x, y)
-        
-        return u_xx(pointx, pointy) + u_yy(pointx, pointy)
-    
-
-    def __call__(self, params, point, model, lossfunction):
-        
-        if self.equation == 'laplace':
-            equationfunction = self.laplace
-        else:
-            NotImplementedError
-        # if lossfunction['initial'] == 'L2':
-        #     initloss = self.L2loss
-        # else:
-        #     raise NotImplementedError
-        
-        if lossfunction['boundary'] == 'MSE':
-            boundarylossftn = self.MSEloss
-        else:
-            raise NotImplementedError
-        
-        if lossfunction['residual'] == 'MSE':
-            residuallossftn = self.MSEloss
-        else:
-            raise NotImplementedError
-        
-        if self.domaintype == 'rectangular':
-            boundaryloss = 0
-            for j in range(point['boundary'].shape[0]):
-                boundarymodelpointx, boundarymodelpointy = point['boundary'][j, :, 0:1], point['boundary'][j, :, 1:2]  
-                boundarytargetpoint = point['boundary'][j, :, 2:3]
-                boundaryloss += boundarylossftn(model(params)(boundarymodelpointx, boundarymodelpointy), boundarytargetpoint)
-
-            residualmodelpointx, residualmodelpointy = point['residual'][:, 0:1], point['residual'][:, 1:2]
-            residualtargetpoint = point['residual'][:, 2:3]
-            residualloss = residuallossftn(equationfunction(residualmodelpointx, residualmodelpointy, model(params)), residualtargetpoint)
-
-            return jnp.array([boundaryloss, residualloss])
-        
-        else:
-            raise NotImplementedError
         
 def logging_time(func):
     def wrapper_func(*args, **kwargs):
@@ -174,3 +34,52 @@ class TqdmLoggingHandler(logging.StreamHandler):
             raise
         except Exception:
             self.handleError(record)
+
+def true(epsilon, kappa, delta, p):
+    x = sp.Symbol('x', real=True, positive=True)
+    y = sp.Symbol('y', real = True)
+
+    psip = x ** 4 / 8 + p * (x ** 2 * sp.log(x) / 2 - x ** 4 / 8)
+
+    psi1 = 1
+
+    psi2 = x**2
+
+    psi3 = y**2 - x**2 * sp.log(x)
+
+    psi4 = x**4 - 4*x**2*y**2
+
+    psi5 = 2*y**4 - 9*x**2*y**2 + 3*x**4*sp.log(x) - 12*x**2*y**2*sp.log(x)
+
+    psi6 = x**6 - 12*x**4*y**2 + 8*x**2*y**4
+
+    psi7 = (8*y**6 
+            - 140*x**2*y**4 
+            + 75*x**4*y**2 
+            - 15*x**6*sp.log(x) 
+            + 180*x**4*y**2*sp.log(x)
+            - 120*x**2*y**4*sp.log(x))
+
+    c1, c2, c3, c4, c5, c6, c7 = sp.symbols('c1 c2 c3 c4 c5 c6 c7', real=True)
+
+    psi = psip + c1 * psi1 + c2 * psi2 + c3 * psi3 + c4 * psi4 + c5 * psi5 + c6 * psi6 + c7 * psi7
+
+    alpha = np.arcsin(delta)
+
+    N1, N2, N3 = - (1 + alpha) ** 2 / (epsilon * kappa ** 2), (1 - alpha) ** 2 / (epsilon * kappa ** 2), - kappa / (epsilon * np.cos(alpha) ** 2)
+
+    eq1 = psi.subs({x : 1 + epsilon, y : 0.0})
+    eq2 = psi.subs({x : 1 - epsilon, y : 0.0})
+    eq3 = psi.subs({x : 1 - delta * epsilon, y : kappa * epsilon})
+    eq4 = psi.diff(x).subs({x : 1 - delta * epsilon, y : kappa * epsilon})
+    eq5 = psi.diff(y, y).subs({x : 1 + epsilon, y : 0.0}) + N1 * psi.diff(x).subs({x : 1 + epsilon, y : 0.0})
+    eq6 = psi.diff(y, y).subs({x : 1 - epsilon, y : 0.0}) + N2 * psi.diff(x).subs({x : 1 - epsilon, y : 0.0})
+    eq7 = psi.diff(x, x).subs({x : 1 - delta * epsilon, y : kappa * epsilon}) + N3 * psi.diff(y).subs({x : 1 - delta * epsilon, y : kappa * epsilon})
+
+    try:
+        c = sp.nsolve((eq1, eq2, eq3, eq4, eq5, eq6, eq7), (c1, c2, c3, c4, c5, c6, c7), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), prec = 10)
+        cdict = {c1 : c[0], c2 : c[1], c3 : c[2], c4 : c[3], c5 : c[4], c6 : c[5], c7 : c[6]}
+        return sp.lambdify((x, y), psi.subs(cdict), modules = 'numpy')
+    
+    except:
+        raise ValueError 

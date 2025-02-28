@@ -1,24 +1,41 @@
 data:
-  equation: 'laplace'
+  equation: 'gradshafrnov'
   pointnbrs: [1_000, 10_000]
-  domaintype: 'rectangular'
-  geometry: [[0, 0], [2, 1]]
+  domainvariables: [0.625, 0.37, 1.25] # epsilon, kappa, delta
+  P: 0.375
+
+# model:
+#   mode: 'parameteric'
+#   layers: [32, 32, 32, 1]
+#   lrtype: 'constant'
+#   init_lr: 1e-2
+#   decay_steps:
+#     30000: 5e-3
+#     # 35000: 1e-3
+#     # 45000: 5e-4
+#     # 47500: 1e-4
+#   optimizer: 'adam'
+#   epoch: 10_000
 
 model:
-  layers: [2, 32, 32, 32, 1]
+  mode: 'P2INN'
+  layers: 
+    encodereq: [2, 150, 150, 50]
+    encoderpara: [4, 50, 50, 50]
+    decoder: [100, 50, 25, 1] 
   lrtype: 'constant'
-  init_lr: 1e-2
+  init_lr: 1e-3
   decay_steps:
-    30000: 5e-3
-    # 35000: 1e-3
-    # 45000: 5e-4
-    # 47500: 1e-4
+    30000: 5e-4
+    35000: 1e-4
+    45000: 5e-5
+    47500: 1e-5
   optimizer: 'adam'
-  epoch: 50_000
+  epoch: 20_000
 
 coeff:
   residual: 1
-  boundary: 10
+  boundary: 100
   regularizer: 0.1
 
 compile_period: 100
